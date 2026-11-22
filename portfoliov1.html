@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!--  . is class, # is id, and no symbol is tag DON'T FORGET!! CSS goes in the style areas. cause duh -->
+    <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Agrave+Pro:wght@100..700&display=swap" rel="stylesheet">
+        
+        <style>
+
+            .agave-pro {
+            font-family: "Agrave Pro", cursive;
+            font-optical-sizing: auto;
+            font-weight: 300;
+            font-style: normal;
+            }
+
+            :root {
+                --main-color: rgb(68, 109, 129);
+                --medium-color: rgb(132, 196, 228);
+                --lightest-color: rgb(224, 245, 255);
+                --lightish-color: rgb(192, 231, 251);
+                --lighter-color: rgb(110, 180, 214);
+                --lighter-color-alpha: rgba(110, 180, 214, 0.7);
+                --darker-color: rgb(34, 54, 64);
+            }
+            html,
+            body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                overflow: hidden;
+            }
+            .background {
+                position: fixed;
+                inset: 0;
+                background-color: var(--main-color);
+                z-index: 0;
+                overflow: hidden;
+            }
+            
+            .button {
+                margin-top: 12px;
+                padding: 10px 16px;
+                background: var(--lightish-color);
+                color: var(--main-color);
+                border: 0;
+                border-radius: 4px;
+                font-family: inherit;
+            }
+            .button:hover {
+                background-color: var(--medium-color);
+            }
+
+            .background::before {
+                content: "";
+                position: absolute;
+                inset: -10%;
+                background-image: url("https://github.com/odessakay-cmd/odessakay/blob/main/bgimg.png");
+                background-position: center;
+                background-size: cover;
+                background-repeat: no-repeat;
+                transform: var(--background-transform, translate(0, 0));
+                transition: transform 0.25s ease-out;
+            }
+            .corner-image {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 500px;
+                height: auto;
+                z-index: 3;
+                pointer-events: none;
+            }
+            .cover {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                position: fixed;
+                z-index: 1;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 90vw;
+                height: 96vh;
+                box-sizing: border-box;
+                background-color: var(--lighter-color-alpha);
+                color: var(--lightest-color);
+                padding: 3vh 5vw;
+                border-radius: 20px;
+            }
+            .cover h3 {
+                margin-top: -10px;
+            }
+
+
+            .topcorner-image {
+                position: absolute;
+                top: 0em;
+                right: 0em;
+                width: clamp(300px, 25vw, 300px);
+                height: auto;
+                z-index: 2;
+                pointer-events: none;
+            }
+            .particle {
+                position: absolute;
+                width: clamp(35px, 5vw, 75px);
+                height: auto;
+                pointer-events: none;
+                user-select: none;
+                will-change: transform;
+            }
+            .particle1,
+            .particle2 {
+                display: none;
+            }
+
+
+
+            
+        </style>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const background = document.querySelector(".background");
+                const particleSources = [
+                    document.querySelector(".particle1").src,
+                    document.querySelector(".particle2").src
+                ];
+                const cursor = { x: 0, y: 0 };
+                const particles = [];
+
+                for (let i = 0; i < 6; i++) {
+                    const particle = document.createElement("img");
+                    particle.className = "particle";
+                    particle.src = particleSources[Math.floor(Math.random() * particleSources.length)];
+                    particle.alt = "";
+
+                    const size = 70 + Math.random() * 40;
+                    particle.style.width = `${size}px`;
+                    background.appendChild(particle);
+
+                    particles.push({
+                        element: particle,
+                        x: Math.random() * window.innerWidth,
+                        y: Math.random() * window.innerHeight,
+                        vx: (Math.random() - 0.5) * 0.8,
+                        vy: (Math.random() - 0.5) * 0.8,
+                        size,
+                        phase: Math.random() * Math.PI * 2,
+                        depth: 4 + Math.random() * 10
+                    });
+                }
+
+                window.addEventListener("pointermove", (event) => {
+                    cursor.x = event.clientX / window.innerWidth - 0.5;
+                    cursor.y = event.clientY / window.innerHeight - 0.5;
+                    const moveX = cursor.x * 10;
+                    const moveY = cursor.y * 10;
+                    background.style.setProperty(
+                        "--background-transform",
+                        `translate(${moveX}px, ${moveY}px)`
+                    );
+                });
+
+                let time = 0;
+                function animate() {
+                    time += 0.012;
+
+                    particles.forEach((particle) => {
+                        particle.vx *= 0.985;
+                        particle.vy *= 0.985;
+                        particle.x += particle.vx;
+                        particle.y += particle.vy;
+
+                        if (particle.x < -particle.size) particle.x = window.innerWidth;
+                        if (particle.x > window.innerWidth) particle.x = -particle.size;
+                        if (particle.y < -particle.size) particle.y = window.innerHeight;
+                        if (particle.y > window.innerHeight) particle.y = -particle.size;
+
+                        const naturalX = Math.sin(time + particle.phase) * 3;
+                        const naturalY = Math.cos(time * 0.8 + particle.phase) * 3;
+                        const cursorX = cursor.x * particle.depth;
+                        const cursorY = cursor.y * particle.depth;
+
+                        particle.element.style.transform =
+                            `translate3d(${particle.x + naturalX + cursorX}px, ${particle.y + naturalY + cursorY}px, 0)`;
+                    });
+
+                    requestAnimationFrame(animate);
+                }
+
+                animate();
+            });
+        </script>
+    </head>
+    <body>
+        <div class="background">
+            <img class="topcorner-image" src="https://media.discordapp.net/attachments/718095058980831232/1574121032330252458/downloadcopy-ezgif.com-rotate.gif?ex=6b047df3&is=6b032c73&hm=1ddcf7f221590318e0f7fb0959faf137833829835aeb8d1cf73ae5e1103ddef1&width=640&height=640" alt="top corner image">
+
+            <img class="particle1" src="https://media.discordapp.net/attachments/718095058980831232/1574118563936075916/BALL-ezgif.com-effects.gif?ex=6b047ba7&is=6b032a27&hm=488d76b461d32b5e72cd398cc18537393117957ad99463eb6a641e192a287016&width=1536&height=1536" alt="particle 1">
+            
+            <img class="particle2" src="https://media.discordapp.net/attachments/718095058980831232/1574118564649238670/ball2-ezgif.com-effects.gif?ex=6b047ba7&is=6b032a27&hm=f574394f50aa069e631648dc7cffee51f7eebd041daba9b8cc54925c8f9983be&width=1536&height=1536" alt="particle 2">
+
+        </div>
+        <div class="cover">
+            <h1 class="regular">Odessa Kay</h1>
+            <button type="button" onclick="window.location.href='portfolio.html'" class="button">A portfolio</button>
+        </div>
+        <img class="corner-image" src="https://media.discordapp.net/attachments/718095058980831232/1574105281154256968/download.gif?ex=6b046f48&is=6b031dc8&hm=ca8f5356c7bc23068320b0c2a0717de073aa9b7f12c4a044a916429891c54254&width=640&height=640" alt="corner image">
+
+        <main>
+            
+        </main>
+        <footer>
+        </footer>
+    </body>
+</html>
